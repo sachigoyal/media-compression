@@ -16,7 +16,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileVideo, FileImage, Download, RotateCcw, Maximize2 } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  FileVideo,
+  FileImage,
+  Download,
+  RotateCcw,
+  Maximize2,
+  Settings,
+} from "lucide-react";
 import { FileUpload } from "./file-upload";
 import { CompressionSettings } from "./compression-settings";
 import { useCompressionContext } from "@/contexts/compression-context";
@@ -31,7 +43,7 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
   type,
 }) => {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
-  
+
   const {
     state,
     ffmpeg,
@@ -79,12 +91,28 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+      <div className="flex flex-col md:flex-row justify-between gap-6">
+        <Card className="w-full">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
               <IconComponent className="h-5 w-5" />
               {currentConfig.title}
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96">
+                  <CompressionSettings
+                    type={type}
+                    settings={state.settings}
+                    onSettingsChange={setSettings}
+                  />
+                </PopoverContent>
+              </Popover>
             </CardTitle>
             <CardDescription>{currentConfig.description}</CardDescription>
           </CardHeader>
@@ -129,21 +157,62 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Compression Settings</CardTitle>
-            <CardDescription>
-              Configure quality, format, and resolution
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-full">
-            <CompressionSettings
-              type={type}
-              settings={state.settings}
-              onSettingsChange={setSettings}
-            />
-          </CardContent>
-        </Card>
+        {state.blob && (
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Result</CardTitle>
+              <CardDescription>{currentConfig.previewTitle}</CardDescription>
+            </CardHeader>
+            <CardContent className="w-full space-y-4 h-full flex flex-col">
+              <div className="rounded-lg overflow-hidden w-full h-full">
+                {type === "video" ? (
+                  <video
+                    src={URL.createObjectURL(state.blob)}
+                    controls
+                    className="w-full aspect-video object-contain"
+                  />
+                ) : (
+                  <img
+                    src={URL.createObjectURL(state.blob)}
+                    alt="Compressed"
+                    className="w-full h-full object-contain"
+                  />
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-auto">
+                <div className="text-sm text-muted-foreground">
+                  Size: {Math.round(state.blob.size / 1024 / 1024)}MB
+                  {compressionRatio && (
+                    <span className="text-green-600 ml-1">
+                      ({compressionRatio}% smaller)
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsFullscreenOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                    Fullscreen
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleDownload}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
       {isProcessing && (
         <Card>
@@ -152,65 +221,6 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
               <Progress value={ffmpeg.progress.progress} className="h-2" />
               <div className="text-sm text-muted-foreground text-center">
                 {Math.round(ffmpeg.progress.progress)}% complete
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {state.blob && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Result</CardTitle>
-            <CardDescription>{currentConfig.previewTitle}</CardDescription>
-          </CardHeader>
-          <CardContent className="w-full space-y-4">
-            <div
-              className="rounded-lg overflow-hidden max-w-sm mx-auto"
-            >
-              {type === "video" ? (
-                <video
-                  src={URL.createObjectURL(state.blob)}
-                  controls
-                  className="w-full aspect-video object-contain"
-                />
-              ) : (
-                <img
-                  src={URL.createObjectURL(state.blob)}
-                  alt="Compressed"
-                  className="w-full h-full object-contain"
-                />
-              )}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Size: {Math.round(state.blob.size / 1024 / 1024)}MB
-                {compressionRatio && (
-                  <span className="text-green-600 ml-1">
-                    ({compressionRatio}% smaller)
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsFullscreenOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                  Fullscreen
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={handleDownload}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download
-                </Button>
               </div>
             </div>
           </CardContent>
