@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { CheckCircle, AlertCircle, Clock, Download, FileText } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -49,43 +48,30 @@ export function ProgressTracker({
   const getStatusIcon = () => {
     switch (progress.status) {
       case 'idle':
-        return <Clock className="h-5 w-5 text-muted-foreground" />
+        return <Clock className="h-3 w-3 text-muted-foreground" />
       case 'processing':
-        return <Clock className="h-5 w-5 text-blue-500 animate-spin" />
+        return <Clock className="h-3 w-3 text-primary animate-spin" />
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />
+        return <CheckCircle className="h-3 w-3 text-muted-foreground" />
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-500" />
+        return <AlertCircle className="h-3 w-3 text-destructive" />
       default:
-        return <Clock className="h-5 w-5 text-muted-foreground" />
-    }
-  }
-
-  const getStatusColor = () => {
-    switch (progress.status) {
-      case 'processing':
-        return 'default'
-      case 'completed':
-        return 'default'
-      case 'error':
-        return 'destructive'
-      default:
-        return 'secondary'
+        return <Clock className="h-3 w-3 text-muted-foreground" />
     }
   }
 
   const getStatusText = () => {
     switch (progress.status) {
       case 'idle':
-        return 'Ready to compress'
+        return 'Ready'
       case 'processing':
-        return 'Compressing...'
+        return 'Processing'
       case 'completed':
-        return 'Compression complete'
+        return 'Complete'
       case 'error':
-        return 'Compression failed'
+        return 'Error'
       default:
-        return 'Unknown status'
+        return 'Unknown'
     }
   }
 
@@ -94,106 +80,98 @@ export function ProgressTracker({
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {getStatusIcon()}
-          Compression Progress
-          <Badge variant={getStatusColor() as any} className="ml-auto">
-            {getStatusText()}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Progress Bar */}
-        {progress.status === 'processing' && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span>{Math.round(progress.progress)}%</span>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        {getStatusIcon()}
+        <span className="text-sm font-medium">Progress</span>
+        <Badge variant="outline" className="ml-auto text-xs h-4 px-1">
+          {getStatusText()}
+        </Badge>
+      </div>
+
+      {progress.status === 'processing' && (
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span>Progress</span>
+            <span>{Math.round(progress.progress)}%</span>
+          </div>
+          <Progress value={progress.progress} className="h-2" />
+          {progress.estimatedTime && (
+            <p className="text-xs text-muted-foreground">
+              ETA: {formatTime(progress.estimatedTime)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {progress.status === 'error' && progress.error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-3 w-3" />
+          <AlertDescription className="text-xs">{progress.error}</AlertDescription>
+        </Alert>
+      )}
+
+      {(progress.originalSize || progress.compressedSize) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+          {progress.originalSize && (
+            <div className="text-center p-2 bg-muted border">
+              <div className="text-muted-foreground">Original</div>
+              <div className="font-semibold">
+                {formatFileSize(progress.originalSize)}
+              </div>
             </div>
-            <Progress value={progress.progress} className="w-full" />
-            {progress.estimatedTime && (
-              <p className="text-sm text-muted-foreground">
-                Estimated time remaining: {formatTime(progress.estimatedTime)}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Error Message */}
-        {progress.status === 'error' && progress.error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{progress.error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* File Size Information */}
-        {(progress.originalSize || progress.compressedSize) && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {progress.originalSize && (
-              <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">Original Size</div>
-                <div className="text-lg font-semibold">
-                  {formatFileSize(progress.originalSize)}
-                </div>
+          )}
+          
+          {progress.compressedSize && (
+            <div className="text-center p-2 bg-muted border">
+              <div className="text-muted-foreground">Compressed</div>
+              <div className="font-semibold">
+                {formatFileSize(progress.compressedSize)}
               </div>
-            )}
-            
-            {progress.compressedSize && (
-              <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">Compressed Size</div>
-                <div className="text-lg font-semibold text-green-600">
-                  {formatFileSize(progress.compressedSize)}
-                </div>
+            </div>
+          )}
+          
+          {progress.compressionRatio && (
+            <div className="text-center p-2 bg-muted border">
+              <div className="text-muted-foreground">Saved</div>
+              <div className="font-semibold">
+                {Math.round(progress.compressionRatio * 100)}%
               </div>
-            )}
-            
-            {progress.compressionRatio && (
-              <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">Space Saved</div>
-                <div className="text-lg font-semibold text-blue-600">
-                  {Math.round(progress.compressionRatio * 100)}%
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
+      )}
 
-        {/* Elapsed Time */}
-        {progress.elapsedTime && (
-          <div className="text-center text-sm text-muted-foreground">
-            Processing completed in {formatTime(progress.elapsedTime)}
-          </div>
-        )}
+      {progress.elapsedTime && (
+        <div className="text-center text-xs text-muted-foreground">
+          Completed in {formatTime(progress.elapsedTime)}
+        </div>
+      )}
 
-        {/* Action Buttons */}
-        {progress.status === 'completed' && (
-          <div className="flex gap-2 pt-4">
-            {progress.downloadUrl && onDownload && (
-              <Button onClick={onDownload} className="flex-1">
-                <Download className="h-4 w-4 mr-2" />
-                Download Compressed File
-              </Button>
-            )}
-            {onReset && (
-              <Button variant="outline" onClick={onReset}>
-                <FileText className="h-4 w-4 mr-2" />
-                Compress Another
-              </Button>
-            )}
-          </div>
-        )}
-
-        {progress.status === 'error' && onReset && (
-          <div className="pt-4">
-            <Button variant="outline" onClick={onReset} className="w-full">
-              Try Again
+      {progress.status === 'completed' && (
+        <div className="flex gap-2 pt-2">
+          {progress.downloadUrl && onDownload && (
+            <Button onClick={onDownload} className="flex-1 h-8 text-xs">
+              <Download className="h-3 w-3 mr-1" />
+              Download
             </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+          {onReset && (
+            <Button variant="outline" onClick={onReset} className="h-8 text-xs">
+              <FileText className="h-3 w-3 mr-1" />
+              Reset
+            </Button>
+          )}
+        </div>
+      )}
+
+      {progress.status === 'error' && onReset && (
+        <div className="pt-2">
+          <Button variant="outline" onClick={onReset} className="w-full h-8 text-xs">
+            Try Again
+          </Button>
+        </div>
+      )}
+    </div>
   )
 } 

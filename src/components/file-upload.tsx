@@ -3,7 +3,6 @@
 import React, { useCallback, useState } from 'react'
 import { Upload, X, FileVideo, FileImage } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 interface FileUploadProps {
@@ -100,101 +99,93 @@ export function FileUpload({
 
   if (currentFile && preview) {
     return (
-      <Card className="w-full">
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {type === 'image' ? (
-                  <FileImage className="h-5 w-5 text-blue-500" />
-                ) : (
-                  <FileVideo className="h-5 w-5 text-green-500" />
-                )}
-                <div>
-                  <p className="font-medium text-sm">{currentFile.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatFileSize(currentFile.size)}
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleRemove}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="relative rounded-lg overflow-hidden bg-muted">
-              {type === 'image' ? (
-                <img 
-                  src={preview} 
-                  alt="Preview" 
-                  className="w-full h-48 object-cover"
-                />
-              ) : (
-                <video 
-                  src={preview} 
-                  controls 
-                  className="w-full h-48 object-cover"
-                />
-              )}
+      <div className="border border-border p-2 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {type === 'image' ? (
+              <FileImage className="h-4 w-4" />
+            ) : (
+              <FileVideo className="h-4 w-4" />
+            )}
+            <div>
+              <p className="font-medium text-xs">{currentFile.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatFileSize(currentFile.size)}
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRemove}
+            className="h-6 w-6 p-0"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+        
+        <div className="relative bg-muted">
+          {type === 'image' ? (
+            <img 
+              src={preview} 
+              alt="Preview" 
+              className="w-full h-32 object-cover"
+            />
+          ) : (
+            <video 
+              src={preview} 
+              controls 
+              className="w-full aspect-video object-cover"
+            />
+          )}
+        </div>
+      </div>
     )
   }
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6">
-        <div
-          className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
-            dragOver 
-              ? "border-primary bg-primary/5" 
-              : "border-muted-foreground/25 hover:border-muted-foreground/50"
-          )}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="mx-auto mb-4">
-            {type === 'image' ? (
-              <FileImage className="h-12 w-12 text-muted-foreground mx-auto" />
-            ) : (
-              <FileVideo className="h-12 w-12 text-muted-foreground mx-auto" />
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <p className="text-lg font-medium">
-              Drop your {type} here, or click to browse
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Supports {accept.replace(/[*]/g, '').replace(/[/]/g, ' ').toUpperCase()} files up to {maxSize}MB
-            </p>
-          </div>
+    <div
+      className={cn(
+        "border-2 border-dashed p-4 text-center transition-colors",
+        dragOver 
+          ? "border-primary bg-primary/5" 
+          : "border-muted-foreground/25 hover:border-muted-foreground/50"
+      )}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <div className="mx-auto mb-2">
+        {type === 'image' ? (
+          <FileImage className="h-6 w-6 text-muted-foreground mx-auto" />
+        ) : (
+          <FileVideo className="h-6 w-6 text-muted-foreground mx-auto" />
+        )}
+      </div>
+      
+      <div className="space-y-1">
+        <p className="text-xs font-medium">
+          Drop {type} or browse
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {accept.replace(/[*]/g, '').replace(/[/]/g, ' ').toUpperCase()} up to {maxSize}MB
+        </p>
+      </div>
 
-          <div className="mt-6">
-            <Button asChild>
-              <label className="cursor-pointer">
-                <Upload className="h-4 w-4 mr-2" />
-                Choose File
-                <input
-                  type="file"
-                  className="hidden"
-                  accept={accept}
-                  onChange={handleFileInputChange}
-                />
-              </label>
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="mt-3">
+        <Button asChild size="sm" className="h-6 text-xs">
+          <label className="cursor-pointer">
+            <Upload className="h-3 w-3 mr-1" />
+            Choose
+            <input
+              type="file"
+              className="hidden"
+              accept={accept}
+              onChange={handleFileInputChange}
+            />
+          </label>
+        </Button>
+      </div>
+    </div>
   )
 } 

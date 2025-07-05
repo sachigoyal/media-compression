@@ -28,13 +28,28 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Handle worker files
+    // Handle FFmpeg worker and dynamic imports
     config.module.rules.push({
       test: /\.worker\.js$/,
       use: { loader: 'worker-loader' },
     });
 
+    // Fix for dynamic imports in FFmpeg
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+
+    // Handle dynamic imports
+    config.output.environment = {
+      ...config.output.environment,
+      dynamicImport: true,
+    };
+
     return config;
+  },
+  experimental: {
+    esmExternals: 'loose',
   },
 };
 
