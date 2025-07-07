@@ -32,6 +32,44 @@ export const validateFileSize = (file: File, maxSizeMB: number): boolean => {
   return file.size <= maxSizeMB * 1024 * 1024
 }
 
+export const getImageMemoryEstimate = async (file: File): Promise<{ width: number, height: number, estimatedMemoryMB: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const pixels = img.width * img.height
+      const estimatedMemoryMB = (pixels * 4) / (1024 * 1024) * 3
+      
+      resolve({
+        width: img.width,
+        height: img.height,
+        estimatedMemoryMB
+      })
+    }
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load image'))
+    }
+    
+    img.src = url
+  })
+}
+
+export const isImageSafeForProcessing = (width: number, height: number, quality: 'speed' | 'low' | 'medium' | 'high'): boolean => {
+  const pixels = width * height
+  const limits = {
+    speed: 8000000,
+    low: 12000000,
+    medium: 16000000,
+    high: 25000000
+  }
+  
+  return pixels <= limits[quality]
+}
+
 export const validateFileType = (file: File, acceptedTypes: string): boolean => {
   const types = acceptedTypes.split(',').map(type => type.trim())
   const fileType = file.type

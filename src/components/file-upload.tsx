@@ -45,7 +45,38 @@ export function FileUpload({
     }
   }, [])
 
-  const handleFileSelect = useCallback((file: File) => {
+  const validateImageDimensions = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (type !== 'image') {
+        resolve(true)
+        return
+      }
+
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const pixels = img.width * img.height
+        const maxPixels = 25000000
+        
+        if (pixels > maxPixels) {
+          alert(`Image dimensions too large (${img.width}x${img.height}). Maximum recommended: ~5000x5000 pixels. Large images will be automatically resized during compression.`)
+        }
+        resolve(true)
+      }
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        alert('Invalid image file')
+        resolve(false)
+      }
+      
+      img.src = url
+    })
+  }
+
+  const handleFileSelect = useCallback(async (file: File) => {
     if (file.size > maxSize * 1024 * 1024) {
       alert(`File size must be less than ${maxSize}MB`)
       return
@@ -62,6 +93,11 @@ export function FileUpload({
 
     if (!isValidType) {
       alert(`Please select a valid ${type} file`)
+      return
+    }
+
+    const isValidDimensions = await validateImageDimensions(file)
+    if (!isValidDimensions) {
       return
     }
 

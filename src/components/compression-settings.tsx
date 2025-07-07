@@ -54,10 +54,10 @@ const imageResolutions = [
 ];
 
 const qualityOptions = [
-  { value: "speed", label: "Speed", description: "Fastest" },
-  { value: "low", label: "Low", description: "Smallest" },
+  { value: "speed", label: "Speed", description: "Fastest, low memory" },
+  { value: "low", label: "Low", description: "Smallest, low memory" },
   { value: "medium", label: "Medium", description: "Balanced" },
-  { value: "high", label: "High", description: "Best" },
+  { value: "high", label: "High", description: "Best quality, high memory" },
 ];
 
 export function CompressionSettings({
