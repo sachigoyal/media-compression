@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileVideo, FileImage } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import ThemeToggler from "@/components/theme-toggle";
 import { MediaCompressionPanel } from "@/components/media-compression-panel";
 import { CompressionProvider } from "@/contexts/compression-context";
 
@@ -39,7 +39,7 @@ export function CompressionInterface() {
             FFmpeg-powered video and image compression
           </p>
         </div>
-        <ThemeToggle />
+        <ThemeToggler />
       </div>
 
       <Tabs

@@ -13,8 +13,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Popover,
@@ -54,6 +52,17 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
     handleReset,
     isProcessing,
   } = useCompressionContext();
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) {
+      return `${bytes}B`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)}KB`;
+    } else {
+      const mb = bytes / (1024 * 1024);
+      return `${mb.toFixed(2)}MB`;
+    }
+  };
 
   const config = useMemo(
     () => ({
@@ -96,8 +105,8 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-              <IconComponent className="h-5 w-5" />
-              {currentConfig.title}
+                <IconComponent className="h-5 w-5" />
+                {currentConfig.title}
               </div>
               <Popover>
                 <PopoverTrigger asChild>
@@ -128,8 +137,7 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
 
             {state.file && (
               <div className="text-sm text-muted-foreground">
-                {state.file.name} ({Math.round(state.file.size / 1024 / 1024)}
-                MB)
+                {state.file.name} ({formatFileSize(state.file.size)})
               </div>
             )}
 
@@ -182,7 +190,7 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
 
               <div className="flex items-center justify-between mt-auto">
                 <div className="text-sm text-muted-foreground">
-                  Size: {Math.round(state.blob.size / 1024 / 1024)}MB
+                  Size: {formatFileSize(state.blob.size)}
                   {compressionRatio && (
                     <span className="text-green-600 ml-1">
                       ({compressionRatio}% smaller)
@@ -228,30 +236,25 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
       )}
 
       <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
-        <DialogContent className="sm:max-w-7xl h-full max-h-[90vh] p-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle>{currentConfig.previewTitle}</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 p-6 pt-2 overflow-hidden">
-            <div className="h-full w-full rounded-lg overflow-hidden bg-black/5 flex items-center justify-center">
-              {state.blob && (
-                <>
-                  {type === "video" ? (
-                    <video
-                      src={URL.createObjectURL(state.blob)}
-                      controls
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : (
-                    <img
-                      src={URL.createObjectURL(state.blob)}
-                      alt="Compressed"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  )}
-                </>
-              )}
-            </div>
+        <DialogContent className="sm:max-w-7xl h-full max-h-[90vh]">
+          <div className="w-full h-full flex-1 flex items-center justify-center">
+            {state.blob && (
+              <>
+                {type === "video" ? (
+                  <video
+                    src={URL.createObjectURL(state.blob)}
+                    controls
+                    className="max-w-full max-h-full object-contain"
+                  />
+                ) : (
+                  <img
+                    src={URL.createObjectURL(state.blob)}
+                    alt="Compressed"
+                    className="max-w-full max-h-full object-contain"
+                  />
+                )}
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>

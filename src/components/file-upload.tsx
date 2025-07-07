@@ -129,7 +129,7 @@ export function FileUpload({
             <img 
               src={preview} 
               alt="Preview" 
-              className="w-full h-32 object-cover"
+              className="w-full h-auto object-cover"
             />
           ) : (
             <video 
