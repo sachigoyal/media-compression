@@ -76,7 +76,7 @@ export function CompressionSettings({
   };
 
   return (
-      <div className="h-full flex flex-col gap-3">
+    <div className="h-full flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Settings</span>
         <Badge variant="outline" className="capitalize text-xs h-4 px-1">

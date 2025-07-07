@@ -114,7 +114,7 @@ export const MediaCompressionPanel: React.FC<MediaCompressionPanelProps> = ({
                     <Settings className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-96">
+                <PopoverContent className="w-auto">
                   <CompressionSettings
                     type={type}
                     settings={state.settings}
