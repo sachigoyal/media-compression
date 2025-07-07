@@ -17,7 +17,6 @@ export function useFFmpeg() {
     return ffmpegRef.current
   }, [])
 
-  // Load FFmpeg at initialization
   useEffect(() => {
     const initializeFFmpeg = async () => {
       try {

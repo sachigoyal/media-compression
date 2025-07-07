@@ -46,13 +46,11 @@ export function FileUpload({
   }, [])
 
   const handleFileSelect = useCallback((file: File) => {
-    // Validate file size
     if (file.size > maxSize * 1024 * 1024) {
       alert(`File size must be less than ${maxSize}MB`)
       return
     }
 
-    // Validate file type
     const acceptedTypes = accept.split(',').map(type => type.trim())
     const fileType = file.type
     const isValidType = acceptedTypes.some(acceptedType => {
@@ -67,7 +65,6 @@ export function FileUpload({
       return
     }
 
-    // Create preview
     const reader = new FileReader()
     reader.onload = (e) => {
       setPreview(e.target?.result as string)
@@ -124,12 +121,12 @@ export function FileUpload({
           </Button>
         </div>
         
-        <div className="relative bg-muted">
+        <div className="relative">
           {type === 'image' ? (
             <img 
               src={preview} 
               alt="Preview" 
-              className="w-full h-auto object-cover"
+              className="w-full max-w-xl mx-auto h-auto object-cover"
             />
           ) : (
             <video 

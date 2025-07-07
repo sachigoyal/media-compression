@@ -19,7 +19,6 @@ const nextConfig: NextConfig = {
     ];
   },
   webpack: (config, { isServer }) => {
-    // Fix for FFmpeg.wasm
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -28,19 +27,16 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Handle FFmpeg worker and dynamic imports
     config.module.rules.push({
       test: /\.worker\.js$/,
       use: { loader: 'worker-loader' },
     });
 
-    // Fix for dynamic imports in FFmpeg
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
     };
 
-    // Handle dynamic imports
     config.output.environment = {
       ...config.output.environment,
       dynamicImport: true,

@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 export interface CompressionSettings {
-  quality: "low" | "medium" | "high";
+  quality: "speed" | "low" | "medium" | "high";
   format: string;
   resolution: string;
 }
@@ -54,6 +54,7 @@ const imageResolutions = [
 ];
 
 const qualityOptions = [
+  { value: "speed", label: "Speed", description: "Fastest" },
   { value: "low", label: "Low", description: "Smallest" },
   { value: "medium", label: "Medium", description: "Balanced" },
   { value: "high", label: "High", description: "Best" },

@@ -2,7 +2,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
 
 export interface CompressionSettings {
-  quality: 'low' | 'medium' | 'high'
+  quality: 'speed' | 'low' | 'medium' | 'high'
   format: string
   resolution: string
 }
@@ -59,24 +59,19 @@ export class FFmpegCore {
       const inputName = `input.${file.name.split('.').pop()}`
       const outputName = `output.${settings.format}`
       
-      // Write input file
       await this.ffmpeg.writeFile(inputName, await fetchFile(file))
       
-      // Build FFmpeg command
       const args = this.buildVideoCommand(inputName, outputName, settings)
       
-      // Execute compression
       this.ffmpeg.on('progress', ({ progress }) => {
         this.updateProgress({ status: 'processing', progress: progress * 100 })
       })
       
       await this.ffmpeg.exec(args)
       
-      // Read output
       const data = await this.ffmpeg.readFile(outputName)
       const blob = new Blob([data], { type: `video/${settings.format}` })
       
-      // Clean up
       await this.ffmpeg.deleteFile(inputName)
       await this.ffmpeg.deleteFile(outputName)
       
@@ -104,24 +99,19 @@ export class FFmpegCore {
       const inputName = `input.${file.name.split('.').pop()}`
       const outputName = `output.${settings.format}`
       
-      // Write input file
       await this.ffmpeg.writeFile(inputName, await fetchFile(file))
       
-      // Build FFmpeg command
       const args = this.buildImageCommand(inputName, outputName, settings)
       
-      // Execute compression
       this.ffmpeg.on('progress', ({ progress }) => {
         this.updateProgress({ status: 'processing', progress: progress * 100 })
       })
       
       await this.ffmpeg.exec(args)
       
-      // Read output
       const data = await this.ffmpeg.readFile(outputName)
       const blob = new Blob([data], { type: `image/${settings.format}` })
       
-      // Clean up
       await this.ffmpeg.deleteFile(inputName)
       await this.ffmpeg.deleteFile(outputName)
       
@@ -141,26 +131,35 @@ export class FFmpegCore {
   private buildVideoCommand(input: string, output: string, settings: CompressionSettings): string[] {
     const args = ['-i', input]
     
-    // Quality settings
     switch (settings.quality) {
+      case 'speed':
+        args.push('-crf', '35', '-preset', 'ultrafast')
+        args.push('-x264-params', 'aq-mode=0:me=dia:subme=1:ref=1')
+        break
       case 'low':
-        args.push('-crf', '32', '-preset', 'fast')
+        args.push('-crf', '32', '-preset', 'ultrafast')
         break
       case 'medium':
-        args.push('-crf', '23', '-preset', 'medium')
+        args.push('-crf', '23', '-preset', 'superfast')
         break
       case 'high':
-        args.push('-crf', '18', '-preset', 'slow')
+        args.push('-crf', '18', '-preset', 'fast')
         break
     }
     
-    // Resolution
     if (settings.resolution !== 'original') {
       args.push('-s', settings.resolution)
     }
     
-    // Codec
     args.push('-c:v', 'libx264', '-c:a', 'aac')
+    args.push('-threads', '0')
+
+    if (settings.quality === 'speed') {
+      args.push('-tune', 'zerolatency')
+      args.push('-movflags', '+faststart')
+    } else {
+      args.push('-tune', 'fastdecode')
+    }
     
     args.push(output)
     return args
@@ -169,7 +168,6 @@ export class FFmpegCore {
   private buildImageCommand(input: string, output: string, settings: CompressionSettings): string[] {
     const args = ['-i', input]
     
-    // Quality settings based on format
     if (settings.format === 'jpeg') {
       const quality = settings.quality === 'low' ? '2' : settings.quality === 'medium' ? '5' : '8'
       args.push('-q:v', quality)
@@ -181,7 +179,6 @@ export class FFmpegCore {
       args.push('-compression_level', compression)
     }
     
-    // Resolution
     if (settings.resolution !== 'original') {
       args.push('-s', settings.resolution)
     }
